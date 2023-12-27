@@ -37,6 +37,7 @@ import com.mygdx.game.lang.Renderer;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Geolocation;
 import com.mygdx.game.utils.MapRasterTiles;
+import com.mygdx.game.utils.MongoDBConnection;
 import com.mygdx.game.utils.ZoomXY;
 
 import java.io.File;
@@ -46,6 +47,7 @@ import java.io.IOException;
 
 public class ProjectTest extends ApplicationAdapter implements GestureDetector.GestureListener {
 
+    private MongoDBConnection mongoDBConnection;
     private ShapeRenderer shapeRenderer;
     private Vector3 touchPosition;
 
@@ -87,6 +89,9 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
+
+        // Create the MongoDB connection
+        //mongoDBConnection = new MongoDBConnection();
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
@@ -195,6 +200,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     public void dispose() {
         shapeRenderer.dispose();
         hudStage.dispose();
+        //mongoDBConnection.closeConnection();
     }
 
     @Override
