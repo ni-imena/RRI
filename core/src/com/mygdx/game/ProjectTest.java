@@ -76,6 +76,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     private boolean showLangExample = false;
     private boolean weatherRain = false;
     private ParticleEffect rainParticleEffect;
+    private boolean weatherSnow = false;
+    private ParticleEffect snowParticleEffect;
 
     // animation
     private Stage stage;
@@ -118,24 +120,27 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         touchPosition = new Vector3();
 
-        Document filterCriteria = new Document("location.coordinates", new Document("$exists", true));
-        Document element = mongoDBConnection.findDocuments(filterCriteria, "runs").first();
-
-        Document location = element.get("location", Document.class);
-        List<Double> coordinates = location.getList("coordinates",  Double.class);
-
-        double latitude =  coordinates.get(0);
-        double longitude =  coordinates.get(1);
-
-        System.out.println("Latitude: " + latitude);
-        System.out.println("Longitude: " + longitude);
-
-        Geolocation temp = new Geolocation( latitude, longitude);
-
-//        Document filter2 = new Document("stream.latlng.data", new Document("$exists", true));
-//        Document el2 = mongoDBConnection.findDocuments(filter2, "runs").first();
+//        TESTNO PRIDOBIVANJE PODATKOV
+//        Document filterCriteria = new Document("location.coordinates", new Document("$exists", true));
+//        Document element = mongoDBConnection.findDocuments(filterCriteria, "runs").first();
 //
-//        Document stream = el2.get("stream", Document.class);
+//        Document location = element.get("location", Document.class);
+//        List<Double> coordinates = location.getList("coordinates",  Double.class);
+//
+//        double latitude =  coordinates.get(0);
+//        double longitude =  coordinates.get(1);
+//
+//        System.out.println("Latitude: " + latitude);
+//        System.out.println("Longitude: " + longitude);
+//
+//        Geolocation temp = new Geolocation( latitude, longitude);
+
+        // ZAENKRAT VZAME VEDNO ENAK TEK, POTREBNO DODAT NEKO SEARCH FUNKCIJO ALI PODOBNO
+        Document filter2 = new Document("stream.latlng.data", new Document("$exists", true));
+        Document element2 = mongoDBConnection.findDocuments(filter2, "runs").first();
+
+        // stream za risanje teka
+        Document stream = element2.get("stream", Document.class);
 //        Document latlng= stream.get("latlng", Document.class);
 //        List<Double> latlngData = latlng.getList("data",  Double.class);
 
@@ -175,9 +180,15 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         // rain
         rainParticleEffect = new ParticleEffect();
-        rainParticleEffect.load(Gdx.files.internal("particles/ParticleParkRain.p"), Gdx.files.internal("particles"));
+        rainParticleEffect.load(Gdx.files.internal("particles/Rain.p"), Gdx.files.internal("particles"));
         rainParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         rainParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
+
+        // snow
+        snowParticleEffect = new ParticleEffect();
+        snowParticleEffect.load(Gdx.files.internal("particles/SnowFlakes.p"), Gdx.files.internal("particles"));
+        snowParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
+        snowParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
         // boat
         boatAnimation = new BoatAnimation(boatCoordinates, beginTile, 5);
@@ -221,6 +232,16 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             // Update and draw the rain particle effect
             rainParticleEffect.update(Gdx.graphics.getDeltaTime());
             rainParticleEffect.draw(spriteBatch, Gdx.graphics.getDeltaTime());
+
+            spriteBatch.end();
+        }
+
+        // weather Snow
+        if (weatherSnow){
+            spriteBatch.begin();
+
+            snowParticleEffect.update(Gdx.graphics.getDeltaTime());
+            snowParticleEffect.draw(spriteBatch, Gdx.graphics.getDeltaTime());
 
             spriteBatch.end();
         }
@@ -359,7 +380,19 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         rain.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if(weatherSnow)
+                    weatherSnow = false;
                 weatherRain = !weatherRain;
+            }
+        });
+
+        TextButton snow = new TextButton("Snow", skin);
+        snow.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if(weatherRain)
+                    weatherRain = false;
+                weatherSnow = !weatherSnow;
             }
         });
 
@@ -377,8 +410,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         buttonTable.add(langButton).padBottom(15).expandX().fill().row();
         buttonTable.add(animButton).padBottom(15).fillX().row();
         buttonTable.add(rain).padBottom(15).fillX().row();
+        buttonTable.add(snow).padBottom(15).fillX().row();
         buttonTable.add(quitButton).fillX();
-
 
         table.add(buttonTable);
         table.left();
