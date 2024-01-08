@@ -40,10 +40,17 @@ import com.mygdx.game.utils.MapRasterTiles;
 import com.mygdx.game.utils.MongoDBConnection;
 import com.mygdx.game.utils.ZoomXY;
 
+import org.bson.Document;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.print.Doc;
 
 public class ProjectTest extends ApplicationAdapter implements GestureDetector.GestureListener {
 
@@ -91,7 +98,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         shapeRenderer = new ShapeRenderer();
 
         // Create the MongoDB connection
-        //mongoDBConnection = new MongoDBConnection();
+        mongoDBConnection = new MongoDBConnection();
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.MAP_WIDTH, Constants.MAP_HEIGHT);
@@ -106,6 +113,27 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         viewport = new FitViewport(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f, camera);
 
         touchPosition = new Vector3();
+
+        Document filterCriteria = new Document("location.coordinates", new Document("$exists", true));
+        Document element = mongoDBConnection.findDocuments(filterCriteria, "runs").first();
+
+        Document location = element.get("location", Document.class);
+        List<Double> coordinates = location.getList("coordinates",  Double.class);
+
+        double latitude =  coordinates.get(0);
+        double longitude =  coordinates.get(1);
+
+        System.out.println("Latitude: " + latitude);
+        System.out.println("Longitude: " + longitude);
+
+        Geolocation temp = new Geolocation( latitude, longitude);
+
+//        Document filter2 = new Document("stream.latlng.data", new Document("$exists", true));
+//        Document el2 = mongoDBConnection.findDocuments(filter2, "runs").first();
+//
+//        Document stream = el2.get("stream", Document.class);
+//        Document latlng= stream.get("latlng", Document.class);
+//        Document latlngData = latlng.get("data",  Document.class);
 
         try {
             //in most cases, geolocation won't be in the center of the tile because tile borders are predetermined (geolocation can be at the corner of a tile)
@@ -178,6 +206,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     }
 
     private void drawMarkers() {
+
+
         Vector2 marker = MapRasterTiles.getPixelPosition(MARKER_GEOLOCATION.lat, MARKER_GEOLOCATION.lng, beginTile.x, beginTile.y);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -187,20 +217,20 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         shapeRenderer.end();
 
         // boat positions
-        /*for(int i=0; i<boatAnimation.getInterpolatedPositions().length; i++){
+        for(int i=0; i<boatAnimation.getInterpolatedPositions().length; i++){
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.setColor(Color.RED);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.circle(boatAnimation.getInterpolatedPositions()[i].x, boatAnimation.getInterpolatedPositions()[i].y, 10);
             shapeRenderer.end();
-        }*/
+        }
     }
 
     @Override
     public void dispose() {
         shapeRenderer.dispose();
         hudStage.dispose();
-        //mongoDBConnection.closeConnection();
+        mongoDBConnection.closeConnection();
     }
 
     @Override
@@ -304,6 +334,14 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             }
         });
 
+        TextButton changeLoc = new TextButton("Location", skin);
+        changeLoc.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                stage.addActor(boatAnimation.create());
+            }
+        });
+
         TextButton quitButton = new TextButton("Quit", skin);
         quitButton.addListener(new ClickListener() {
             @Override
@@ -317,6 +355,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         buttonTable.add(langButton).padBottom(15).expandX().fill().row();
         buttonTable.add(animButton).padBottom(15).fillX().row();
+        buttonTable.add(changeLoc).padBottom(15).fillX().row();
         buttonTable.add(quitButton).fillX();
 
 

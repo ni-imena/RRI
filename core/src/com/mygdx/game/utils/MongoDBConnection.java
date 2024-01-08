@@ -1,5 +1,6 @@
 package com.mygdx.game.utils;
 
+import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -12,17 +13,22 @@ public class MongoDBConnection {
 
     private MongoClient mongoClient;
     private MongoDatabase database;
-
-    private static String DATABASE_URL = "mongodb://localhost:27017"; // CHANGE THIS
-    private static String DATABASE_NAME = "your_database_name"; // CHANGE THIS
-
+    private static String DATABASE_URL = "mongodb+srv://admin:admin@ni-imena.sygmxf2.mongodb.net/?retryWrites=true&w=majority";
+    private static String DATABASE_NAME = "ni_imena";
 
     public MongoDBConnection() {
         // Connect to the MongoDB server
         mongoClient = MongoClients.create(DATABASE_URL);
 
-        // Access the database
-        database = mongoClient.getDatabase(DATABASE_NAME);
+        try {
+            // Access the database
+            database = mongoClient.getDatabase(DATABASE_NAME);
+            database.runCommand(new Document("ping", 1));
+            System.out.println("Pinged your deployment. You successfully connected to MongoDB!");
+        }
+        catch (MongoException e) {
+            e.printStackTrace();
+        }
     }
 
     // Add methods to interact with the database as needed

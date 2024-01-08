@@ -104,6 +104,6 @@ project(":core") {
         api "com.badlogicgames.ashley:ashley:$ashleyVersion"
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
-        implementation 'org.mongodb:mongodb-driver-sync:4.3.3'
+        implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
     }
 }
