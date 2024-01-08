@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -30,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.lang.Context;
@@ -72,6 +74,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     private Stage hudStage;
     private Skin skin;
     private boolean showLangExample = false;
+    private boolean weatherRain = false;
+    private ParticleEffect rainParticleEffect;
 
     // animation
     private Stage stage;
@@ -133,7 +137,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 //
 //        Document stream = el2.get("stream", Document.class);
 //        Document latlng= stream.get("latlng", Document.class);
-//        Document latlngData = latlng.get("data",  Document.class);
+//        List<Double> latlngData = latlng.getList("data",  Double.class);
 
         try {
             //in most cases, geolocation won't be in the center of the tile because tile borders are predetermined (geolocation can be at the corner of a tile)
@@ -169,6 +173,12 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         Gdx.input.setInputProcessor(new InputMultiplexer(hudStage, new GestureDetector(this)));
 
+        // rain
+        rainParticleEffect = new ParticleEffect();
+        rainParticleEffect.load(Gdx.files.internal("particles/ParticleParkRain.p"), Gdx.files.internal("particles"));
+        rainParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
+        rainParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
+
         // boat
         boatAnimation = new BoatAnimation(boatCoordinates, beginTile, 5);
         stage = new Stage(viewport, spriteBatch);
@@ -202,6 +212,17 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        // weather Rain
+        if (weatherRain){
+            spriteBatch.begin();
+
+            // Update and draw the rain particle effect
+            rainParticleEffect.update(Gdx.graphics.getDeltaTime());
+            rainParticleEffect.draw(spriteBatch, Gdx.graphics.getDeltaTime());
+
+            spriteBatch.end();
         }
     }
 
@@ -334,11 +355,11 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             }
         });
 
-        TextButton changeLoc = new TextButton("Location", skin);
-        changeLoc.addListener(new ClickListener() {
+        TextButton rain = new TextButton("Rain", skin);
+        rain.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                stage.addActor(boatAnimation.create());
+                weatherRain = !weatherRain;
             }
         });
 
@@ -355,7 +376,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         buttonTable.add(langButton).padBottom(15).expandX().fill().row();
         buttonTable.add(animButton).padBottom(15).fillX().row();
-        buttonTable.add(changeLoc).padBottom(15).fillX().row();
+        buttonTable.add(rain).padBottom(15).fillX().row();
         buttonTable.add(quitButton).fillX();
 
 
