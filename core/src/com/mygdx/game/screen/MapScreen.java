@@ -1,11 +1,11 @@
-package com.mygdx.game;
+package com.mygdx.game.screen;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
@@ -26,18 +25,16 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mongodb.client.FindIterable;
+import com.mygdx.game.BoatAnimation;
+import com.mygdx.game.VirtualRunner;
 import com.mygdx.game.lang.Context;
 import com.mygdx.game.lang.Renderer;
 import com.mygdx.game.utils.Constants;
@@ -54,18 +51,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.print.Doc;
-
-public class ProjectTest extends ApplicationAdapter implements GestureDetector.GestureListener {
+public class MapScreen extends ScreenAdapter implements GestureDetector.GestureListener{
 
     private MongoDBConnection mongoDBConnection;
     private ShapeRenderer shapeRenderer;
     private Vector3 touchPosition;
+    private final VirtualRunner game;
+    private final AssetManager assetManager;
 
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
@@ -87,10 +81,6 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     private ParticleEffect snowParticleEffect;
 
     // animation
-    private Stage stage;
-    private FitViewport viewport;
-
-    // boat animation
     Geolocation[] runCoordinates = {
             new Geolocation(46.5602f, 15.625186f),
             new Geolocation(46.5580f, 15.632482f),
@@ -100,6 +90,28 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     };
     BoatAnimation boatAnimation;
 
+    // center geolocation
+
+    public MapScreen(VirtualRunner game) {
+        this.game = game;
+        assetManager = game.getAssetManager();
+    }
+
+
+    public void createBoat() {
+        boatAnimation = new BoatAnimation(runCoordinates, beginTile, 5);
+        stage = new Stage(viewport, spriteBatch);
+        stage.addActor(boatAnimation.create());
+    }
+
+    public void removeBoat() {
+        Actor boatActor = stage.getRoot().findActor("boat");
+        if (boatActor != null) {
+            boatActor.remove();
+        }
+    }
+    private Stage stage;
+    private FitViewport viewport;
     public static Geolocation calculateCenter(Geolocation[] coordinates) {
         if (coordinates == null || coordinates.length == 0) {
             throw new IllegalArgumentException("Coordinates array is null or empty");
@@ -124,9 +136,6 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 
         return new Geolocation(centerLat, centerLng);
     }
-
-
-    // center geolocation
     private Geolocation centerGeolocation = calculateCenter(runCoordinates);  // new Geolocation(46.557314, 15.637771);
 
     public void createMap() {
@@ -156,21 +165,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
     }
 
-    public void createBoat() {
-        boatAnimation = new BoatAnimation(runCoordinates, beginTile, 5);
-        stage = new Stage(viewport, spriteBatch);
-        stage.addActor(boatAnimation.create());
-    }
-
-    public void removeBoat() {
-        Actor boatActor = stage.getRoot().findActor("boat");
-        if (boatActor != null) {
-            boatActor.remove();
-        }
-    }
-
     @Override
-    public void create() {
+    public void show() {
         shapeRenderer = new ShapeRenderer();
 
         // Create the MongoDB connection
@@ -230,9 +226,8 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         // boat
         createBoat();
     }
-
     @Override
-    public void render() {
+    public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
         handleInput();
@@ -282,7 +277,6 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             spriteBatch.end();
         }
     }
-
     private void drawMarkers() {
 
 
@@ -303,7 +297,6 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
             shapeRenderer.end();
         }
     }
-
     public void updateCoordinates(String runId) {
         int reduction = 10;
         FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document("_id", new ObjectId(runId)), "runs");
@@ -339,14 +332,12 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         hudStage.dispose();
         mongoDBConnection.closeConnection();
     }
-
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
         touchPosition.set(x, y, 0);
         camera.unproject(touchPosition);
         return false;
     }
-
     @Override
     public boolean tap(float x, float y, int count, int button) {
         return false;
