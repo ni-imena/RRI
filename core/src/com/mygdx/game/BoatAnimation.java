@@ -11,9 +11,9 @@ import com.mygdx.game.utils.MapRasterTiles;
 import com.mygdx.game.utils.ZoomXY;
 
 public class BoatAnimation {
-    private final Geolocation[] geolocations;
-    private final Vector2[] positions;
-    private final Vector2[] interpolatedPositions;
+    private Geolocation[] geolocations;
+    private Vector2[] positions;
+    private Vector2[] interpolatedPositions;
 
     public BoatAnimation(Geolocation[] geolocations, ZoomXY beginTile, int numInterpolatedPoints){
         this.geolocations = geolocations;
@@ -48,6 +48,12 @@ public class BoatAnimation {
 
     public Geolocation[] getGeolocations() {
         return geolocations;
+    }
+
+    public void setGeolocations(Geolocation[] geolocations, ZoomXY beginTile, int numInterpolatedPoints) {
+        this.geolocations = geolocations;
+        this.positions = positionsFromGeolocations(geolocations, beginTile);
+        this.interpolatedPositions = getInterpolatedPositions(positions, numInterpolatedPoints);
     }
 
     public Vector2[] getPositions() {

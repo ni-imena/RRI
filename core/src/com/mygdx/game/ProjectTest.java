@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
@@ -27,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -34,6 +37,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.mongodb.client.FindIterable;
 import com.mygdx.game.lang.Context;
 import com.mygdx.game.lang.Renderer;
 import com.mygdx.game.utils.Constants;
@@ -43,6 +47,7 @@ import com.mygdx.game.utils.MongoDBConnection;
 import com.mygdx.game.utils.ZoomXY;
 
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +55,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.print.Doc;
 
@@ -84,20 +91,83 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     private FitViewport viewport;
 
     // boat animation
-    Geolocation[] boatCoordinates = {
+    Geolocation[] runCoordinates = {
             new Geolocation(46.5602f, 15.625186f),
             new Geolocation(46.5580f, 15.632482f),
             new Geolocation(46.5560f, 15.639112f),
             new Geolocation(46.5555f, 15.647974f),
-            new Geolocation(46.5553f, 15.657566f)
+            new Geolocation(46.5553f, 15.657766f)
     };
     BoatAnimation boatAnimation;
 
-    // center geolocation
-    private final Geolocation CENTER_GEOLOCATION = new Geolocation(46.557314, 15.637771);
+    public static Geolocation calculateCenter(Geolocation[] coordinates) {
+        if (coordinates == null || coordinates.length == 0) {
+            throw new IllegalArgumentException("Coordinates array is null or empty");
+        }
 
-    // test marker
-    private final Geolocation MARKER_GEOLOCATION = new Geolocation(46.559070, 15.638100);
+        double maxLat = Double.MIN_VALUE;
+        double minLat = Double.MAX_VALUE;
+        double maxLng = Double.MIN_VALUE;
+        double minLng = Double.MAX_VALUE;
+
+        // Find the maximum and minimum latitude and longitude
+        for (Geolocation geo : coordinates) {
+            maxLat = Math.max(maxLat, geo.lat);
+            minLat = Math.min(minLat, geo.lat);
+            maxLng = Math.max(maxLng, geo.lng);
+            minLng = Math.min(minLng, geo.lng);
+        }
+
+        // Calculate the center point
+        double centerLat = (maxLat + minLat) / 2.0f;
+        double centerLng = (maxLng + minLng) / 2.0f;
+
+        return new Geolocation(centerLat, centerLng);
+    }
+
+
+    // center geolocation
+    private Geolocation centerGeolocation = calculateCenter(runCoordinates);  // new Geolocation(46.557314, 15.637771);
+
+    public void createMap() {
+        try {
+            ZoomXY centerTile = MapRasterTiles.getTileNumber(centerGeolocation.lat, centerGeolocation.lng, Constants.ZOOM);
+            mapTiles = MapRasterTiles.getRasterTileZone(centerTile, Constants.NUM_TILES);
+            beginTile = new ZoomXY(Constants.ZOOM, centerTile.x - ((Constants.NUM_TILES - 1) / 2), centerTile.y - ((Constants.NUM_TILES - 1) / 2));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        tiledMap = new TiledMap();
+        MapLayers layers = tiledMap.getLayers();
+
+        TiledMapTileLayer layer = new TiledMapTileLayer(Constants.NUM_TILES, Constants.NUM_TILES, MapRasterTiles.TILE_SIZE, MapRasterTiles.TILE_SIZE);
+        int index = 0;
+        for (int j = Constants.NUM_TILES - 1; j >= 0; j--) {
+            for (int i = 0; i < Constants.NUM_TILES; i++) {
+                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                cell.setTile(new StaticTiledMapTile(new TextureRegion(mapTiles[index], MapRasterTiles.TILE_SIZE, MapRasterTiles.TILE_SIZE)));
+                layer.setCell(i, j, cell);
+                index++;
+            }
+        }
+        layers.add(layer);
+
+        tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+    }
+
+    public void createBoat() {
+        boatAnimation = new BoatAnimation(runCoordinates, beginTile, 5);
+        stage = new Stage(viewport, spriteBatch);
+        stage.addActor(boatAnimation.create());
+    }
+
+    public void removeBoat() {
+        Actor boatActor = stage.getRoot().findActor("boat");
+        if (boatActor != null) {
+            boatActor.remove();
+        }
+    }
 
     @Override
     public void create() {
@@ -135,45 +205,12 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
 //
 //        Geolocation temp = new Geolocation( latitude, longitude);
 
-        // ZAENKRAT VZAME VEDNO ENAK TEK, POTREBNO DODAT NEKO SEARCH FUNKCIJO ALI PODOBNO
-        Document filter2 = new Document("stream.latlng.data", new Document("$exists", true));
-        Document element2 = mongoDBConnection.findDocuments(filter2, "runs").first();
-
-        // stream za risanje teka
-        Document stream = element2.get("stream", Document.class);
-//        Document latlng= stream.get("latlng", Document.class);
-//        List<Double> latlngData = latlng.getList("data",  Double.class);
-
-        try {
-            //in most cases, geolocation won't be in the center of the tile because tile borders are predetermined (geolocation can be at the corner of a tile)
-            ZoomXY centerTile = MapRasterTiles.getTileNumber(CENTER_GEOLOCATION.lat, CENTER_GEOLOCATION.lng, Constants.ZOOM);
-            mapTiles = MapRasterTiles.getRasterTileZone(centerTile, Constants.NUM_TILES);
-            //you need the beginning tile (tile on the top left corner) to convert geolocation to a location in pixels.
-            beginTile = new ZoomXY(Constants.ZOOM, centerTile.x - ((Constants.NUM_TILES - 1) / 2), centerTile.y - ((Constants.NUM_TILES - 1) / 2));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        tiledMap = new TiledMap();
-        MapLayers layers = tiledMap.getLayers();
-
-        TiledMapTileLayer layer = new TiledMapTileLayer(Constants.NUM_TILES, Constants.NUM_TILES, MapRasterTiles.TILE_SIZE, MapRasterTiles.TILE_SIZE);
-        int index = 0;
-        for (int j = Constants.NUM_TILES - 1; j >= 0; j--) {
-            for (int i = 0; i < Constants.NUM_TILES; i++) {
-                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                cell.setTile(new StaticTiledMapTile(new TextureRegion(mapTiles[index], MapRasterTiles.TILE_SIZE, MapRasterTiles.TILE_SIZE)));
-                layer.setCell(i, j, cell);
-                index++;
-            }
-        }
-        layers.add(layer);
-
-        tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+        createMap();
 
         // buttons
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         hudStage = new Stage(hudViewport, spriteBatch);
+        hudStage.addActor(createRunList());
         hudStage.addActor(createButtons());
 
         Gdx.input.setInputProcessor(new InputMultiplexer(hudStage, new GestureDetector(this)));
@@ -191,9 +228,7 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         snowParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
         // boat
-        boatAnimation = new BoatAnimation(boatCoordinates, beginTile, 5);
-        stage = new Stage(viewport, spriteBatch);
-        stage.addActor(boatAnimation.create());
+        createBoat();
     }
 
     @Override
@@ -210,10 +245,11 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         hudStage.act(Gdx.graphics.getDeltaTime());
         stage.act(Gdx.graphics.getDeltaTime());
 
+        drawMarkers();
+
         hudStage.draw();
         stage.draw();
 
-        drawMarkers();
 
         // lang
         if(showLangExample){
@@ -250,22 +286,51 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
     private void drawMarkers() {
 
 
-        Vector2 marker = MapRasterTiles.getPixelPosition(MARKER_GEOLOCATION.lat, MARKER_GEOLOCATION.lng, beginTile.x, beginTile.y);
+        Vector2 marker = MapRasterTiles.getPixelPosition(centerGeolocation.lat, centerGeolocation.lng, beginTile.x, beginTile.y);
 
         shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(marker.x, marker.y, 10);
+        shapeRenderer.circle(marker.x, marker.y, 20);
         shapeRenderer.end();
 
         // boat positions
         for(int i=0; i<boatAnimation.getInterpolatedPositions().length; i++){
             shapeRenderer.setProjectionMatrix(camera.combined);
-            shapeRenderer.setColor(Color.RED);
+            shapeRenderer.setColor(Color.BLACK);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.circle(boatAnimation.getInterpolatedPositions()[i].x, boatAnimation.getInterpolatedPositions()[i].y, 10);
             shapeRenderer.end();
         }
+    }
+
+    public void updateCoordinates(String runId) {
+        int reduction = 10;
+        FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document("_id", new ObjectId(runId)), "runs");
+        Document runDocument = documents.first();
+        if (runDocument != null) {
+            Document stream = (Document) runDocument.get("stream");
+            if (stream != null) {
+                Document latlng = (Document) stream.get("latlng");
+                if (latlng != null) {
+                    List<List<Double>> data = (List<List<Double>>) latlng.get("data");
+                    if (data != null) {
+                        runCoordinates = new Geolocation[data.size() / reduction];
+                        List<Geolocation> reducedCoordinates = new ArrayList<>();
+                        for (int i = 0; i < data.size(); i += reduction) {
+                            List<Double> latlngData = data.get(i);
+                            reducedCoordinates.add(new Geolocation(latlngData.get(0), latlngData.get(1)));
+                        }
+                        runCoordinates = reducedCoordinates.toArray(new Geolocation[0]);
+                    }
+                }
+            }
+        }
+        centerGeolocation = calculateCenter(runCoordinates);
+        boatAnimation.setGeolocations(runCoordinates, beginTile, 5);
+        removeBoat();
+        createMap();
+        createBoat();
     }
 
     @Override
@@ -355,6 +420,56 @@ public class ProjectTest extends ApplicationAdapter implements GestureDetector.G
         camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
         camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
     }
+
+
+    private Actor createRunList() {
+        Table table = new Table();
+        table.defaults().pad(5);
+
+        List<String> runNames = new ArrayList<>();
+        List<String> runIds = new ArrayList<>();
+
+        FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document(), "runs");
+        for (Document document : documents) {
+            Document activity = (Document) document.get("activity");
+            if (activity != null) {
+                String name = activity.getString("name");
+                ObjectId id = document.getObjectId("_id");
+
+                if (name != null) {
+                    runNames.add(name);
+                    runIds.add(id.toHexString());
+                }
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(table, skin);
+        scrollPane.setFlickScroll(true);
+
+        for (int i = 0; i < runNames.size(); i++) {
+            final String runName = runNames.get(i);
+            final String runId = runIds.get(i);
+            TextButton runButton = new TextButton(runName, skin);
+            runButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Gdx.app.log("Run Clicked", runName);
+                    updateCoordinates(runId);
+                }
+            });
+            table.add(runButton).padBottom(15).expandX().fill().row();
+        }
+
+        Table listTable = new Table();
+        listTable.add(scrollPane).fill().width(Constants.HUD_WIDTH / 3.0f).height(Constants.HUD_HEIGHT / 2.0f);
+        listTable.bottom();
+        listTable.left();
+        listTable.setFillParent(true);
+        listTable.pack();
+
+        return listTable;
+    }
+
 
     private Actor createButtons() {
         Table table = new Table();

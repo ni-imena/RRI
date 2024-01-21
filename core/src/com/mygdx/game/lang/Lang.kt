@@ -315,6 +315,8 @@ class Scanner(private val automaton: DFA, private val stream: InputStream) {
         }
         last = code // The code following the current lexeme is the first code of the next lexeme
 
+        println("token: $last")
+
         if (automaton.finalStates.contains(state)) {
             val symbol = automaton.symbol(state)
             return if (symbol == SKIP_SYMBOL) {
@@ -406,7 +408,7 @@ class Parser(private val scanner: Scanner) {
                 parseTerminal(SEMI_SYMBOL)
                 Let(name, expr, parseStmt())
             }
-            LINE_SYMBOL -> {
+            LINE_SYMBOL             -> {
                 parseTerminal(LINE_SYMBOL)
                 parseTerminal(LPAREN_SYMBOL)
                 val from = parseExpr()
