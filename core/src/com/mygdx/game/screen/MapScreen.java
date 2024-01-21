@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
@@ -35,6 +36,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mongodb.client.FindIterable;
 import com.mygdx.game.BoatAnimation;
 import com.mygdx.game.VirtualRunner;
+import com.mygdx.game.assets.AssetDescriptors;
 import com.mygdx.game.lang.Context;
 import com.mygdx.game.lang.Renderer;
 import com.mygdx.game.utils.Constants;
@@ -53,7 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapScreen extends ScreenAdapter implements GestureDetector.GestureListener{
+public class MapScreen extends ScreenAdapter implements GestureDetector.GestureListener {
 
     private MongoDBConnection mongoDBConnection;
     private ShapeRenderer shapeRenderer;
@@ -63,6 +65,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
+    private TextureAtlas gameplayAtlas;
     private OrthographicCamera camera;
 
     private Texture[] mapTiles;
@@ -95,6 +98,15 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     public MapScreen(VirtualRunner game) {
         this.game = game;
         assetManager = game.getAssetManager();
+        assetManager.load(AssetDescriptors.PARTICLE_SNOW);
+        assetManager.load(AssetDescriptors.PARTICLE_RAIN);
+        assetManager.load(AssetDescriptors.UI_SKIN);
+//        assetManager.load(AssetDescriptors.GAMEPLAY);
+        assetManager.load(AssetDescriptors.UI_FONT);
+        assetManager.finishLoading();
+        rainParticleEffect = assetManager.get(AssetDescriptors.PARTICLE_RAIN);
+        snowParticleEffect = assetManager.get(AssetDescriptors.PARTICLE_SNOW);
+
     }
 
 
@@ -110,8 +122,10 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             boatActor.remove();
         }
     }
+
     private Stage stage;
     private FitViewport viewport;
+
     public static Geolocation calculateCenter(Geolocation[] coordinates) {
         if (coordinates == null || coordinates.length == 0) {
             throw new IllegalArgumentException("Coordinates array is null or empty");
@@ -136,6 +150,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
         return new Geolocation(centerLat, centerLng);
     }
+
     private Geolocation centerGeolocation = calculateCenter(runCoordinates);  // new Geolocation(46.557314, 15.637771);
 
     public void createMap() {
@@ -180,6 +195,8 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         camera.zoom = 2f;
         camera.update();
 
+        skin = assetManager.get(AssetDescriptors.UI_SKIN);
+//        gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
         spriteBatch = new SpriteBatch();
         hudViewport = new FitViewport(Constants.HUD_WIDTH, Constants.HUD_HEIGHT);
         viewport = new FitViewport(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f, camera);
@@ -204,7 +221,6 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         createMap();
 
         // buttons
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         hudStage = new Stage(hudViewport, spriteBatch);
         hudStage.addActor(createRunList());
         hudStage.addActor(createButtons());
@@ -212,20 +228,18 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         Gdx.input.setInputProcessor(new InputMultiplexer(hudStage, new GestureDetector(this)));
 
         // rain
-        rainParticleEffect = new ParticleEffect();
-        rainParticleEffect.load(Gdx.files.internal("particles/Rain.p"), Gdx.files.internal("particles"));
         rainParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         rainParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
         // snow
-        snowParticleEffect = new ParticleEffect();
-        snowParticleEffect.load(Gdx.files.internal("particles/SnowFlakes.p"), Gdx.files.internal("particles"));
+        snowParticleEffect = assetManager.get(AssetDescriptors.PARTICLE_SNOW);
         snowParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         snowParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
         // boat
         createBoat();
     }
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
@@ -247,7 +261,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
 
         // lang
-        if(showLangExample){
+        if (showLangExample) {
             Renderer renderer = new Renderer();
             try {
                 renderer.render(new FileInputStream(new File("program.txt")), new Context(shapeRenderer, camera, beginTile));
@@ -257,7 +271,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         }
 
         // weather Rain
-        if (weatherRain){
+        if (weatherRain) {
             spriteBatch.begin();
 
             // Update and draw the rain particle effect
@@ -268,7 +282,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         }
 
         // weather Snow
-        if (weatherSnow){
+        if (weatherSnow) {
             spriteBatch.begin();
 
             snowParticleEffect.update(Gdx.graphics.getDeltaTime());
@@ -277,6 +291,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             spriteBatch.end();
         }
     }
+
     private void drawMarkers() {
 
 
@@ -289,7 +304,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.end();
 
         // boat positions
-        for(int i=0; i<boatAnimation.getInterpolatedPositions().length; i++){
+        for (int i = 0; i < boatAnimation.getInterpolatedPositions().length; i++) {
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.setColor(Color.BLACK);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -297,6 +312,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             shapeRenderer.end();
         }
     }
+
     public void updateCoordinates(String runId) {
         int reduction = 10;
         FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document("_id", new ObjectId(runId)), "runs");
@@ -332,12 +348,14 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         hudStage.dispose();
         mongoDBConnection.closeConnection();
     }
+
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
         touchPosition.set(x, y, 0);
         camera.unproject(touchPosition);
         return false;
     }
+
     @Override
     public boolean tap(float x, float y, int count, int button) {
         return false;
@@ -486,7 +504,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         rain.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if(weatherSnow)
+                if (weatherSnow)
                     weatherSnow = false;
                 weatherRain = !weatherRain;
             }
@@ -496,7 +514,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         snow.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if(weatherRain)
+                if (weatherRain)
                     weatherRain = false;
                 weatherSnow = !weatherSnow;
             }

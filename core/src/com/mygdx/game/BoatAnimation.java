@@ -22,7 +22,7 @@ public class BoatAnimation {
     }
 
     public Actor create() {
-        Image boat = new Image(new Texture("boat.png"));
+        Image boat = new Image(new Texture("android/assets/boat.png"));
         boat.setWidth(50f);
         boat.setHeight(50f);
 

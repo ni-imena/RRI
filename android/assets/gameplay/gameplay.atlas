@@ -1,0 +1,104 @@
+
+gameplay.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f1
+  rotate: false
+  xy: 2, 2
+  size: 851, 851
+  orig: 851, 851
+  offset: 0, 0
+  index: -1
+
+gameplay2.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f2
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay3.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f3
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay4.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f4
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay5.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f5
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay6.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f6
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay7.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f7
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay8.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+f8
+  rotate: false
+  xy: 2, 2
+  size: 842, 842
+  orig: 842, 842
+  offset: 0, 0
+  index: -1

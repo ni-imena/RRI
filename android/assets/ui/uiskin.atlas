@@ -1,0 +1,118 @@
+
+uiskin.png
+size: 1024, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+Chakra
+  rotate: false
+  xy: 2, 234
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+Chakra-white
+  rotate: false
+  xy: 2, 104
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+Tajawal
+  rotate: false
+  xy: 774, 362
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+Tajawal-white
+  rotate: false
+  xy: 516, 232
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+beige-dark
+  rotate: false
+  xy: 260, 107
+  size: 30, 30
+  orig: 30, 30
+  offset: 0, 0
+  index: -1
+beige-light
+  rotate: false
+  xy: 646, 268
+  size: 30, 30
+  orig: 30, 30
+  offset: 0, 0
+  index: -1
+check-off
+  rotate: false
+  xy: 944, 430
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+check-on
+  rotate: false
+  xy: 646, 300
+  size: 60, 60
+  orig: 60, 60
+  offset: 0, 0
+  index: -1
+cursor
+  rotate: false
+  xy: 2, 2
+  size: 5, 5
+  orig: 5, 5
+  offset: 0, 0
+  index: -1
+dark
+  rotate: false
+  xy: 247, 99
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+default-round
+  rotate: false
+  xy: 2, 9
+  size: 243, 93
+  orig: 243, 93
+  offset: 0, 0
+  index: -1
+default-round-down
+  rotate: false
+  xy: 260, 139
+  size: 243, 93
+  orig: 243, 93
+  offset: 0, 0
+  index: -1
+default-round-large
+  rotate: false
+  xy: 904, 310
+  size: 38, 180
+  orig: 38, 180
+  offset: 0, 0
+  index: -1
+default-scroll
+  rotate: false
+  xy: 944, 352
+  size: 34, 76
+  orig: 34, 76
+  offset: 0, 0
+  index: -1
+font-light
+  rotate: false
+  xy: 516, 362
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+white
+  rotate: false
+  xy: 505, 229
+  size: 3, 3
+  orig: 3, 3
+  offset: 0, 0
+  index: -1

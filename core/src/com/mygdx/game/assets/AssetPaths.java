@@ -2,7 +2,7 @@ package com.mygdx.game.assets;
 
 public class AssetPaths {
 
-    public static final String UI_FONT = "android/assets/ui/font/default.fnt";
+    public static final String UI_FONT = "android/assets/ui/font/Tajawal.fnt";
 
     public static final String UI_SKIN = "android/assets/ui/uiskin.json";
 

@@ -37,6 +37,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mongodb.client.FindIterable;
 import com.mygdx.game.lang.Context;
 import com.mygdx.game.lang.Renderer;
+import com.mygdx.game.screen.IntroScreen;
 import com.mygdx.game.screen.MapScreen;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Geolocation;
@@ -63,7 +64,7 @@ public class VirtualRunner extends Game {
     public void create () {
         batch = new SpriteBatch();
         assetManager = new AssetManager();
-        setScreen(new MapScreen(this));
+        setScreen(new IntroScreen(this));
     }
 
 
