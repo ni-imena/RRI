@@ -4,9 +4,16 @@ size: 1024, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+end
+  rotate: false
+  xy: 2, 2
+  size: 30, 40
+  orig: 30, 40
+  offset: 0, 0
+  index: -1
 f1
   rotate: false
-  xy: 2, 92
+  xy: 2, 44
   size: 851, 851
   orig: 851, 851
   offset: 0, 0
@@ -16,6 +23,34 @@ semicolon
   xy: 2, 2
   size: 20, 88
   orig: 20, 88
+  offset: 0, 0
+  index: -1
+food
+  rotate: false
+  xy: 34, 10
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+start
+  rotate: false
+  xy: 855, 855
+  size: 30, 40
+  orig: 30, 40
+  offset: 0, 0
+  index: -1
+time
+  rotate: false
+  xy: 887, 863
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+water
+  rotate: false
+  xy: 68, 10
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 

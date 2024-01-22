@@ -275,7 +275,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         if (showLangExample) {
             Renderer renderer = new Renderer();
             try {
-                renderer.render(new FileInputStream(new File("program.txt")), new Context(shapeRenderer, camera, beginTile));
+                renderer.render(new FileInputStream(new File("test.txt")), new Context(shapeRenderer, camera, beginTile, spriteBatch));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
