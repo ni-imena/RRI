@@ -114,16 +114,16 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     }
 
 
-    public void createBoat() {
+    public void createRunner() {
         runnerAnimation = new RunnerAnimation(runCoordinates, beginTile, 5, game);
         stage = new Stage(viewport, spriteBatch);
         stage.addActor(runnerAnimation.create());
     }
 
-    public void removeBoat() {
-        Actor boatActor = stage.getRoot().findActor("boat");
-        if (boatActor != null) {
-            boatActor.remove();
+    public void removeRunner() {
+        Actor runnerActor = stage.getRoot().findActor("runner");
+        if (runnerActor != null) {
+            runnerActor.remove();
         }
     }
 
@@ -239,8 +239,8 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         snowParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         snowParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
-        // boat
-        createBoat();
+        // runner
+        createRunner();
     }
 
     @Override
@@ -306,7 +306,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.circle(marker.x, marker.y, 10);
         shapeRenderer.end();
 
-        // boat positions
+        // runner positions
         for (int i = 0; i < runnerAnimation.getInterpolatedPositions().length; i++) {
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.setColor(Color.BLACK);
@@ -340,9 +340,9 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         }
         centerGeolocation = calculateCenter(runCoordinates);
         runnerAnimation.setGeolocations(runCoordinates, beginTile, 5);
-        removeBoat();
+        removeRunner();
         createMap();
-        createBoat();
+        createRunner();
     }
 
 
