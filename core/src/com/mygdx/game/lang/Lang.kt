@@ -11,8 +11,8 @@ import com.mygdx.game.utils.ZoomXY
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
-import kotlin.Nothing
 import kotlin.math.*
 
 const val ERROR_STATE = 0
@@ -297,6 +297,14 @@ class Scanner(private val automaton: DFA, private val stream: InputStream) {
         }
     }
 
+    fun printTokens(scanner: Scanner) {
+        val token = scanner.getToken()
+        if (token.symbol != EOF_SYMBOL) {
+            print("${name(token.symbol)}(\"${token.lexeme}\") ")
+            printTokens(scanner)
+        }
+    }
+
     fun getToken(): Token {
         val startRow = row
         val startColumn = column
@@ -314,8 +322,6 @@ class Scanner(private val automaton: DFA, private val stream: InputStream) {
             code = stream.read()
         }
         last = code // The code following the current lexeme is the first code of the next lexeme
-
-        println("token: $last")
 
         if (automaton.finalStates.contains(state)) {
             val symbol = automaton.symbol(state)
@@ -947,5 +953,6 @@ class Renderer {
 }
 
 fun main() {
+    //printTokens(Scanner(AUTOMATON, FileInputStream(File("program.txt"))))
     println(load(File("program.txt").inputStream()).toGeoJSON().toString(2))
 }

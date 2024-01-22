@@ -37,8 +37,8 @@ import com.mongodb.client.FindIterable;
 import com.mygdx.game.BoatAnimation;
 import com.mygdx.game.VirtualRunner;
 import com.mygdx.game.assets.AssetDescriptors;
-import com.mygdx.game.lang.Context;
-import com.mygdx.game.lang.Renderer;
+import com.mygdx.game.mylang.Context;
+import com.mygdx.game.mylang.Renderer;
 import com.mygdx.game.utils.Constants;
 import com.mygdx.game.utils.Geolocation;
 import com.mygdx.game.utils.MapRasterTiles;
@@ -264,7 +264,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         if (showLangExample) {
             Renderer renderer = new Renderer();
             try {
-                renderer.render(new FileInputStream(new File("program.txt")), new Context(shapeRenderer, camera, beginTile));
+                renderer.render(new FileInputStream(new File("test.txt")), new Context(shapeRenderer, camera, beginTile, spriteBatch));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }

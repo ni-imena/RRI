@@ -19,6 +19,11 @@ public class RegionNames {
     public static String FRAME_6 = "f6";
     public static String FRAME_7 = "f7";
     public static String FRAME_8 = "f8";
+    public static final String START = "start";
+    public static final String END = "end";
+    public static final String FOOD = "food";
+    public static final String WATER = "water";
+    public static final String TIME = "time";
 
     private RegionNames() {
     }
