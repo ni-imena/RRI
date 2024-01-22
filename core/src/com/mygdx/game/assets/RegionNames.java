@@ -3,9 +3,10 @@ package com.mygdx.game.assets;
 public class RegionNames {
 
     // gameplay.atlas
-    public static final String BACKGROUND = "simple-background";
+    public static final String BACKGROUND = "table-bg";
     public static final String MENU_BACKGROUND = "menu-background";
-    public static final String TABLE_BACKGROUND = "table-background";
+    public static final String TABLE_BACKGROUND = "table-bg";
+    public static final String TABLE_BACKGROUND_2 = "table-vertical";
     public static final String DOTTED_BACKGROUND = "background";
     public static final String PLAIN_BACKGROUND = "plain-background";
     public static final String LABEL_SETTINGS = "settings-label";
@@ -19,6 +20,7 @@ public class RegionNames {
     public static String FRAME_6 = "f6";
     public static String FRAME_7 = "f7";
     public static String FRAME_8 = "f8";
+    public static String SEMI_C = "semicolon";
 
     private RegionNames() {
     }

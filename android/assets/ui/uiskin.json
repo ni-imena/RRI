@@ -1,10 +1,19 @@
 {
   com.badlogic.gdx.graphics.g2d.BitmapFont: {
     default-font: {
-      file: font/default.fnt
+      file: font/Tajawal-white.fnt
     },
     title: {
       file: font/Chakra.fnt
+    },
+    title-light: {
+      file: font/Chakra-white.fnt
+    },
+    "text-light": {
+      "file": font/Tajawal-white.fnt
+    },
+    "text": {
+      "file": font/Tajawal.fnt
     }
   },
   com.badlogic.gdx.graphics.Color: {
@@ -53,6 +62,26 @@
       down: default-round-down,
       checked: default-round-down,
       up: default-round
+    },
+    "lang": {
+      "down": bttn-lang,
+      "up": bttn-lang
+    },
+    "rain": {
+      "down": bttn-rain,
+      "up": bttn-rain
+    },
+    "snow": {
+      "down": bttn-snow,
+      "up": bttn-snow
+    },
+    "anim": {
+      "down": bttn-anim,
+      "up": bttn-anim
+    },
+    "list": {
+      "down": bttn-list,
+      "up": bttn-list
     }
   },
   com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
@@ -66,17 +95,43 @@
       down: default-round-down,
       up: default-round,
       checked: default-round-down,
-      font: default-font,
+      font: title-light,
       fontColor: white,
       downFontColor: red
+    },
+    "orange": {
+      "down": bttn-orange-down,
+      "up": bttn-orange,
+      "font": title-light
+    },
+    "blue": {
+      "down": bttn-blue-down,
+      "up": bttn-blue,
+      "font": title-light
+    },
+    "yellow": {
+      "down": bttn-yellow-down,
+      "up": bttn-yellow,
+      "font": title-light
+    },
+    "white": {
+      "down": bttn-white-down,
+      "up": bttn-white,
+      "font": title
+    },
+    "green": {
+      "down": bttn-green-down,
+      "up": bttn-green,
+      "font": title-light
+    },
+    "bar": {
+      "down": bar-down,
+      "up": bar,
+      "font": text
     }
   },
   com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
     default: {
-      vScroll: default-scroll,
-      hScrollKnob: default-round-large,
-      hScroll: default-scroll,
-      vScrollKnob: default-round-large
     }
   },
   com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {

@@ -24,7 +24,7 @@ import com.mygdx.game.config.GameConfig;
 
 public class IntroScreen extends ScreenAdapter {
 
-    public static final float INTRO_DURATION_IN_SEC = 7.5f;   // duration of the (intro) animation
+    public static final float INTRO_DURATION_IN_SEC = 2.5f;   // duration of the (intro) animation
 
     private final VirtualRunner game;
     private final AssetManager assetManager;
@@ -44,10 +44,6 @@ public class IntroScreen extends ScreenAdapter {
     public IntroScreen(VirtualRunner game) {
         this.game = game;
         assetManager = game.getAssetManager();
-    }
-
-    @Override
-    public void show() {
         viewport = new FitViewport(GameConfig.HUD_WIDTH, GameConfig.HUD_HEIGHT);
         stage = new Stage(viewport, game.getBatch());
         assetManager.load(AssetDescriptors.UI_FONT);
@@ -56,13 +52,15 @@ public class IntroScreen extends ScreenAdapter {
         assetManager.finishLoading();
         gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
+    }
 
+    @Override
+    public void show() {
 
         frame = new Image(gameplayAtlas.findRegion(RegionNames.FRAME_1)); // Initialize dice here
         frame.setOrigin(Align.bottomLeft);
         frame.setPosition(50f, 0f);
         rollFilm();
-
 
         stage.addActor(frame);
     }
@@ -107,13 +105,13 @@ public class IntroScreen extends ScreenAdapter {
         frame.setScale(0.3f);
 
         Label label = new Label("Virtual Runner", skin, "alt");
-        label.setColor(1, 1, 1, 1); // Set initial alpha to 0 for fade in effect
+        label.setColor(1, 1, 1, 1);
 
-        stage.addActor(label); // Add the label to the stage before setting its position
+        stage.addActor(label);
 
         label.setPosition(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2 + label.getHeight());
 
-        frame.addAction(Actions.sequence( // Rotate by another 90 degrees
+        frame.addAction(Actions.sequence(
                 Actions.run(new Runnable() {
 
                     @Override

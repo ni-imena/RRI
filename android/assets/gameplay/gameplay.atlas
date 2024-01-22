@@ -6,9 +6,16 @@ filter: Nearest, Nearest
 repeat: none
 f1
   rotate: false
-  xy: 2, 2
+  xy: 2, 92
   size: 851, 851
   orig: 851, 851
+  offset: 0, 0
+  index: -1
+semicolon
+  rotate: false
+  xy: 2, 2
+  size: 20, 88
+  orig: 20, 88
   offset: 0, 0
   index: -1
 
@@ -100,5 +107,25 @@ f8
   xy: 2, 2
   size: 842, 842
   orig: 842, 842
+  offset: 0, 0
+  index: -1
+
+gameplay9.png
+size: 1024, 1024
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+table-bg
+  rotate: false
+  xy: 2, 2
+  size: 827, 232
+  orig: 827, 232
+  offset: 0, 0
+  index: -1
+table-vertical
+  rotate: false
+  xy: 2, 236
+  size: 505, 584
+  orig: 505, 584
   offset: 0, 0
   index: -1

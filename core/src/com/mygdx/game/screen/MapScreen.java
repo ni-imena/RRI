@@ -1,5 +1,8 @@
 package com.mygdx.game.screen;
 
+import static com.mygdx.game.assets.RegionNames.TABLE_BACKGROUND;
+import static com.mygdx.game.assets.RegionNames.TABLE_BACKGROUND_2;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
@@ -26,17 +29,24 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mongodb.client.FindIterable;
 import com.mygdx.game.BoatAnimation;
 import com.mygdx.game.VirtualRunner;
 import com.mygdx.game.assets.AssetDescriptors;
+import com.mygdx.game.assets.RegionNames;
 import com.mygdx.game.lang.Context;
 import com.mygdx.game.lang.Renderer;
 import com.mygdx.game.utils.Constants;
@@ -73,6 +83,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
     private SpriteBatch spriteBatch;
 
+    private Table listTable;
     // buttons
     private FitViewport hudViewport;
     private Stage hudStage;
@@ -101,11 +112,12 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         assetManager.load(AssetDescriptors.PARTICLE_SNOW);
         assetManager.load(AssetDescriptors.PARTICLE_RAIN);
         assetManager.load(AssetDescriptors.UI_SKIN);
-//        assetManager.load(AssetDescriptors.GAMEPLAY);
+        assetManager.load(AssetDescriptors.GAMEPLAY);
         assetManager.load(AssetDescriptors.UI_FONT);
         assetManager.finishLoading();
         rainParticleEffect = assetManager.get(AssetDescriptors.PARTICLE_RAIN);
         snowParticleEffect = assetManager.get(AssetDescriptors.PARTICLE_SNOW);
+        gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
 
     }
 
@@ -196,27 +208,12 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         camera.update();
 
         skin = assetManager.get(AssetDescriptors.UI_SKIN);
-//        gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
+        gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY);
         spriteBatch = new SpriteBatch();
         hudViewport = new FitViewport(Constants.HUD_WIDTH, Constants.HUD_HEIGHT);
         viewport = new FitViewport(Constants.MAP_WIDTH / 2f, Constants.MAP_HEIGHT / 2f, camera);
 
         touchPosition = new Vector3();
-
-//        TESTNO PRIDOBIVANJE PODATKOV
-//        Document filterCriteria = new Document("location.coordinates", new Document("$exists", true));
-//        Document element = mongoDBConnection.findDocuments(filterCriteria, "runs").first();
-//
-//        Document location = element.get("location", Document.class);
-//        List<Double> coordinates = location.getList("coordinates",  Double.class);
-//
-//        double latitude =  coordinates.get(0);
-//        double longitude =  coordinates.get(1);
-//
-//        System.out.println("Latitude: " + latitude);
-//        System.out.println("Longitude: " + longitude);
-//
-//        Geolocation temp = new Geolocation( latitude, longitude);
 
         createMap();
 
@@ -225,8 +222,22 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         hudStage.addActor(createRunList());
         hudStage.addActor(createButtons());
 
+        Button toggleButton = new Button(skin, "list");
+        toggleButton.setSize(100f,100f);
+        toggleButton.setPosition(hudStage.getWidth() - toggleButton.getWidth() - 20f, 20f);
+
+        hudStage.addActor(toggleButton);
+
+        listTable.setVisible(false);
         Gdx.input.setInputProcessor(new InputMultiplexer(hudStage, new GestureDetector(this)));
 
+        toggleButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Toggle visibility
+                listTable.setVisible(!listTable.isVisible());
+            }
+        });
         // rain
         rainParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         rainParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
@@ -300,7 +311,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.setColor(Color.BLUE);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(marker.x, marker.y, 20);
+        shapeRenderer.circle(marker.x, marker.y, 10);
         shapeRenderer.end();
 
         // boat positions
@@ -308,7 +319,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.setColor(Color.BLACK);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.circle(boatAnimation.getInterpolatedPositions()[i].x, boatAnimation.getInterpolatedPositions()[i].y, 10);
+            shapeRenderer.circle(boatAnimation.getInterpolatedPositions()[i].x, boatAnimation.getInterpolatedPositions()[i].y, 7);
             shapeRenderer.end();
         }
     }
@@ -340,6 +351,157 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         removeBoat();
         createMap();
         createBoat();
+    }
+
+
+    private void handleInput() {
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            camera.zoom += 0.02;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            camera.zoom -= 0.02;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            camera.translate(-3, 0, 0);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            camera.translate(3, 0, 0);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            camera.translate(0, -3, 0);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            camera.translate(0, 3, 0);
+        }
+
+        camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
+
+        float effectiveViewportWidth = camera.viewportWidth * camera.zoom;
+        float effectiveViewportHeight = camera.viewportHeight * camera.zoom;
+
+        camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
+        camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
+    }
+
+
+    private Actor createRunList() {
+        listTable = new Table();
+//        TextureRegion menuBackgroundRegion = gameplayAtlas.findRegion(TABLE_BACKGROUND_2);
+//        listTable.setBackground(new TextureRegionDrawable(menuBackgroundRegion));
+        List<String> runNames = new ArrayList<>();
+        List<String> runIds = new ArrayList<>();
+
+        FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document(), "runs");
+        for (Document document : documents) {
+            Document activity = (Document) document.get("activity");
+            if (activity != null) {
+                String name = activity.getString("name");
+                ObjectId id = document.getObjectId("_id");
+
+                if (name != null) {
+                    runNames.add(name);
+                    runIds.add(id.toHexString());
+                }
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(listTable, skin);
+//        scrollPane.setFlickScroll(true);
+        scrollPane.setScrollingDisabled(true, false);
+
+        for (int i = 0; i < runNames.size(); i++) {
+            final String runName = runNames.get(i);
+            final String runId = runIds.get(i);
+            TextButton runButton = new TextButton(runName, skin,"bar");
+            runButton.getLabel().setAlignment(Align.center); // Center the text
+            runButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Gdx.app.log("Run Clicked", runName);
+                    updateCoordinates(runId);
+                }
+            });
+            listTable.add(runButton).expandX().fill().height(50f).width(300f).row();
+        }
+
+        Table listTable = new Table();
+        listTable.add(scrollPane).fill().width(Constants.HUD_WIDTH / 2.5f).height(Constants.HUD_HEIGHT / 2.0f);
+        listTable.top();
+        listTable.right();
+        listTable.setFillParent(true);
+        listTable.pack();
+        listTable.padTop(20f);
+
+        return listTable;
+    }
+
+
+    private Actor createButtons() {
+        Table table = new Table();
+        table.padLeft(25f).bottom();
+
+        Button langButton = new Button(skin, "lang");
+        langButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showLangExample = !showLangExample;
+            }
+        });
+
+        Button animButton = new Button(skin, "anim");
+        animButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                stage.addActor(boatAnimation.create());
+            }
+        });
+
+        Button rain = new Button(skin, "rain");
+        rain.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (weatherSnow)
+                    weatherSnow = false;
+                weatherRain = !weatherRain;
+            }
+        });
+
+        Button snow = new Button(skin, "snow");
+        snow.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (weatherRain)
+                    weatherRain = false;
+                weatherSnow = !weatherSnow;
+            }
+        });
+
+        TextButton quitButton = new TextButton("Quit", skin);
+        quitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
+
+        Table buttonTable = new Table();
+//        buttonTable.setFillParent(true);
+        buttonTable.defaults();
+        buttonTable.padRight(20f);
+//        TextureRegion menuBackgroundRegion = gameplayAtlas.findRegion(TABLE_BACKGROUND_2);
+//        buttonTable.setBackground(new TextureRegionDrawable(menuBackgroundRegion));
+
+        buttonTable.add(langButton).width(260f).height(75f).row();
+        buttonTable.add(animButton).width(260f).height(75f).row();
+        buttonTable.add(rain).width(260f).height(75f).row();
+        buttonTable.add(snow).width(260f).height(75f).row();
+//        buttonTable.add(quitButton).row();
+        buttonTable.bottom().center();
+        table.add(buttonTable).padBottom(20f);
+
+        table.pack();
+
+        return table;
     }
 
     @Override
@@ -399,150 +561,5 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
     @Override
     public void pinchStop() {
 
-    }
-
-    private void handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            camera.zoom += 0.02;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            camera.zoom -= 0.02;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.translate(-3, 0, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.translate(3, 0, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.translate(0, -3, 0);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.translate(0, 3, 0);
-        }
-
-        camera.zoom = MathUtils.clamp(camera.zoom, 0.5f, 2f);
-
-        float effectiveViewportWidth = camera.viewportWidth * camera.zoom;
-        float effectiveViewportHeight = camera.viewportHeight * camera.zoom;
-
-        camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth / 2f, Constants.MAP_WIDTH - effectiveViewportWidth / 2f);
-        camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight / 2f, Constants.MAP_HEIGHT - effectiveViewportHeight / 2f);
-    }
-
-
-    private Actor createRunList() {
-        Table table = new Table();
-        table.defaults().pad(5);
-
-        List<String> runNames = new ArrayList<>();
-        List<String> runIds = new ArrayList<>();
-
-        FindIterable<Document> documents = mongoDBConnection.findDocuments(new Document(), "runs");
-        for (Document document : documents) {
-            Document activity = (Document) document.get("activity");
-            if (activity != null) {
-                String name = activity.getString("name");
-                ObjectId id = document.getObjectId("_id");
-
-                if (name != null) {
-                    runNames.add(name);
-                    runIds.add(id.toHexString());
-                }
-            }
-        }
-
-        ScrollPane scrollPane = new ScrollPane(table, skin);
-        scrollPane.setFlickScroll(true);
-
-        for (int i = 0; i < runNames.size(); i++) {
-            final String runName = runNames.get(i);
-            final String runId = runIds.get(i);
-            TextButton runButton = new TextButton(runName, skin);
-            runButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    Gdx.app.log("Run Clicked", runName);
-                    updateCoordinates(runId);
-                }
-            });
-            table.add(runButton).padBottom(15).expandX().fill().row();
-        }
-
-        Table listTable = new Table();
-        listTable.add(scrollPane).fill().width(Constants.HUD_WIDTH / 3.0f).height(Constants.HUD_HEIGHT / 2.0f);
-        listTable.bottom();
-        listTable.left();
-        listTable.setFillParent(true);
-        listTable.pack();
-
-        return listTable;
-    }
-
-
-    private Actor createButtons() {
-        Table table = new Table();
-        table.defaults().pad(20);
-
-        TextButton langButton = new TextButton("Lang", skin, "toggle");
-        langButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                showLangExample = !showLangExample;
-            }
-        });
-
-        TextButton animButton = new TextButton("Animation", skin);
-        animButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                stage.addActor(boatAnimation.create());
-            }
-        });
-
-        TextButton rain = new TextButton("Rain", skin);
-        rain.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (weatherSnow)
-                    weatherSnow = false;
-                weatherRain = !weatherRain;
-            }
-        });
-
-        TextButton snow = new TextButton("Snow", skin);
-        snow.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (weatherRain)
-                    weatherRain = false;
-                weatherSnow = !weatherSnow;
-            }
-        });
-
-        TextButton quitButton = new TextButton("Quit", skin);
-        quitButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
-
-        Table buttonTable = new Table();
-        buttonTable.defaults().padLeft(30).padRight(30);
-
-        buttonTable.add(langButton).padBottom(15).expandX().fill().row();
-        buttonTable.add(animButton).padBottom(15).fillX().row();
-        buttonTable.add(rain).padBottom(15).fillX().row();
-        buttonTable.add(snow).padBottom(15).fillX().row();
-        buttonTable.add(quitButton).fillX();
-
-        table.add(buttonTable);
-        table.left();
-        table.top();
-        table.setFillParent(true);
-        table.pack();
-
-        return table;
     }
 }
