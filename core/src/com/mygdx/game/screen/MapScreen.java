@@ -239,7 +239,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         snowParticleEffect.setPosition(0, Constants.MAP_HEIGHT); // Set the initial position above the screen
         snowParticleEffect.getEmitters().first().getSpawnWidth().setHigh(Constants.MAP_WIDTH);
 
-        // runner
+        // boat
         createRunner();
     }
 
