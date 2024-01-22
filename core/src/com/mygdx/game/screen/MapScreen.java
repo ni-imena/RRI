@@ -1,8 +1,5 @@
 package com.mygdx.game.screen;
 
-import static com.mygdx.game.assets.RegionNames.TABLE_BACKGROUND;
-import static com.mygdx.game.assets.RegionNames.TABLE_BACKGROUND_2;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
@@ -39,7 +36,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mongodb.client.FindIterable;
-import com.mygdx.game.BoatAnimation;
+import com.mygdx.game.RunnerAnimation;
 import com.mygdx.game.VirtualRunner;
 import com.mygdx.game.assets.AssetDescriptors;
 import com.mygdx.game.mylang.Context;
@@ -97,7 +94,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             new Geolocation(46.5555f, 15.647974f),
             new Geolocation(46.5553f, 15.657766f)
     };
-    BoatAnimation boatAnimation;
+    RunnerAnimation runnerAnimation;
 
     // center geolocation
 
@@ -118,9 +115,9 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
 
 
     public void createBoat() {
-        boatAnimation = new BoatAnimation(runCoordinates, beginTile, 5);
+        runnerAnimation = new RunnerAnimation(runCoordinates, beginTile, 5, game);
         stage = new Stage(viewport, spriteBatch);
-        stage.addActor(boatAnimation.create());
+        stage.addActor(runnerAnimation.create());
     }
 
     public void removeBoat() {
@@ -310,11 +307,11 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         shapeRenderer.end();
 
         // boat positions
-        for (int i = 0; i < boatAnimation.getInterpolatedPositions().length; i++) {
+        for (int i = 0; i < runnerAnimation.getInterpolatedPositions().length; i++) {
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.setColor(Color.BLACK);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.circle(boatAnimation.getInterpolatedPositions()[i].x, boatAnimation.getInterpolatedPositions()[i].y, 7);
+            shapeRenderer.circle(runnerAnimation.getInterpolatedPositions()[i].x, runnerAnimation.getInterpolatedPositions()[i].y, 7);
             shapeRenderer.end();
         }
     }
@@ -342,7 +339,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
             }
         }
         centerGeolocation = calculateCenter(runCoordinates);
-        boatAnimation.setGeolocations(runCoordinates, beginTile, 5);
+        runnerAnimation.setGeolocations(runCoordinates, beginTile, 5);
         removeBoat();
         createMap();
         createBoat();
@@ -447,7 +444,7 @@ public class MapScreen extends ScreenAdapter implements GestureDetector.GestureL
         animButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                stage.addActor(boatAnimation.create());
+                stage.addActor(runnerAnimation.create());
             }
         });
 

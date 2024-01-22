@@ -26,6 +26,7 @@ public class RegionNames {
     public static final String FOOD = "food";
     public static final String WATER = "water";
     public static final String TIME = "time";
+    public static final String MAN = "man";
 
     private RegionNames() {
     }

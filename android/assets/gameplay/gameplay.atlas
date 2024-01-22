@@ -6,16 +6,23 @@ filter: Nearest, Nearest
 repeat: none
 end
   rotate: false
-  xy: 2, 2
+  xy: 855, 903
   size: 30, 40
   orig: 30, 40
   offset: 0, 0
   index: -1
 f1
   rotate: false
-  xy: 2, 44
+  xy: 2, 92
   size: 851, 851
   orig: 851, 851
+  offset: 0, 0
+  index: -1
+food
+  rotate: false
+  xy: 887, 911
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1
 semicolon
@@ -25,30 +32,23 @@ semicolon
   orig: 20, 88
   offset: 0, 0
   index: -1
-food
-  rotate: false
-  xy: 34, 10
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: -1
 start
   rotate: false
-  xy: 855, 855
+  xy: 24, 50
   size: 30, 40
   orig: 30, 40
   offset: 0, 0
   index: -1
 time
   rotate: false
-  xy: 887, 863
+  xy: 56, 58
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 water
   rotate: false
-  xy: 68, 10
+  xy: 921, 911
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -150,6 +150,13 @@ size: 1024, 1024
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+man
+  rotate: false
+  xy: 509, 308
+  size: 403, 512
+  orig: 403, 512
+  offset: 0, 0
+  index: -1
 table-bg
   rotate: false
   xy: 2, 2
